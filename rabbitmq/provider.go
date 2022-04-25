@@ -104,6 +104,11 @@ func Provider() *schema.Provider {
 			"rabbitmq_limit":               resourceLimit(),
 		},
 
+		DataSourcesMap: map[string]*schema.Resource{
+
+			"rabbitmq_vhost": dataSourceVhost(),
+		},
+
 		ConfigureFunc: providerConfigure,
 	}
 }
