@@ -33,7 +33,7 @@ func dataSourceVhostRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 
-		return fmt.Errorf("cannot locate vhost: %s", err)
+		return checkDeleted(d, fmt.Errorf("cannot locate vhost: %s", err))
 	}
 
 	d.SetId(vhost.Name)
