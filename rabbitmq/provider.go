@@ -107,6 +107,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 
 			"rabbitmq_vhost":    dataSourceVhost(),
+			"rabbitmq_queue":    dataSourceQueue(),
 			"rabbitmq_exchange": dataSourceExchange(),
 		},
 
