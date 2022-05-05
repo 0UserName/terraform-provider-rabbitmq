@@ -3,9 +3,12 @@ package rabbitmq
 import (
 	"errors"
 	"fmt"
+
 	"strings"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 )
 
@@ -50,4 +53,9 @@ func parseId(resourceId string) (name, vhost string, err error) {
 	name = parts[0]
 	vhost = parts[1]
 	return
+}
+
+func generateUUID() (string, error) {
+
+	return uuid.GenerateUUID()
 }
