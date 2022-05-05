@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 )
 
@@ -94,23 +95,42 @@ func CreateBinding(d *schema.ResourceData, meta interface{}) error {
 		arguments = arguments_json
 	}
 
+	srcName, _, guidSrc := parseStandardIdWithFallback(d.Get("source").(string))
+	dstName, _, guidDst := parseStandardIdWithFallback(d.Get("destination").(string))
+
 	bindingInfo := rabbithole.BindingInfo{
-		Source:          d.Get("source").(string),
-		Destination:     d.Get("destination").(string),
+
+		Source:      srcName,
+		Destination: dstName,
+
 		DestinationType: d.Get("destination_type").(string),
 		RoutingKey:      d.Get("routing_key").(string),
-		Arguments:       arguments,
+
+		Arguments: arguments,
 	}
 
 	propertiesKey, err := declareBinding(rmqc, vhost, bindingInfo)
+
 	if err != nil {
+
 		return err
 	}
 
 	log.Printf("[DEBUG] RabbitMQ: Binding properties key: %s", propertiesKey)
+
 	bindingInfo.PropertiesKey = propertiesKey
-	name := fmt.Sprintf("%s/%s/%s/%s/%s", percentEncodeSlashes(vhost), bindingInfo.Source, bindingInfo.Destination, bindingInfo.DestinationType, bindingInfo.PropertiesKey)
-	d.SetId(name)
+
+	/*
+		Use the guid parsed from the identifiers of the parent resources:
+		queue or exchange. Since the guid changes every time the resource
+		is recreated, it will help to track changes at the level of child
+		resources and recreate them.
+
+		https://github.com/cyrilgdn/terraform-provider-rabbitmq/issues/34
+		https://github.com/cyrilgdn/terraform-provider-rabbitmq/issues/25
+	*/
+
+	d.SetId(strings.TrimRight(fmt.Sprintf("%s/%s/%s/%s/%s/%s/%s", percentEncodeSlashes(vhost), bindingInfo.Source, bindingInfo.Destination, bindingInfo.DestinationType, bindingInfo.PropertiesKey, guidSrc, guidDst), "/"))
 
 	return ReadBinding(d, meta)
 }

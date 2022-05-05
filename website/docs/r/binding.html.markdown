@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_binding"
 sidebar_current: "docs-rabbitmq-resource-binding"
 description: |-
-  Creates and manages a binding on a RabbitMQ server.
+Creates and manages a binding on a RabbitMQ server.
 ---
 
 # rabbitmq\_binding
@@ -75,6 +75,10 @@ The following arguments are supported:
 
 * `arguments` - (Optional) Additional key/value arguments for the binding.
 
+~> **NOTE:** The source and destination properties take the names of queues or exchangers as arguments. However, it is
+acceptable (and desirable) to use the identifiers of these resources. This will help to correctly track the state of the
+binding when the state of the mentioned resources changes. See [GH-3][GH-3] (new) [GH-34][GH-34], [GH-25][GH-25].
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
@@ -84,8 +88,14 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 
 Bindings can be imported using the `id` which is composed of
-  `vhost/source/destination/destination_type/properties_key`. E.g.
+`vhost/source/destination/destination_type/properties_key`. E.g.
 
 ```
 $ terraform import rabbitmq_binding.test test/test/test/queue/%23
 ```
+
+[GH-3]: https://github.com/0UserName/terraform-provider-rabbitmq/issues/3
+
+[GH-34]: https://github.com/cyrilgdn/terraform-provider-rabbitmq/issues/34
+
+[GH-25]: https://github.com/cyrilgdn/terraform-provider-rabbitmq/issues/25

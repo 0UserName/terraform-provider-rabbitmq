@@ -5,9 +5,9 @@ import (
 	"log"
 	"strings"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 )
 
 func resourceExchange() *schema.Resource {
@@ -80,12 +80,19 @@ func CreateExchange(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to parse settings")
 	}
 
-	if err := declareExchange(rmqc, vhost, name, settingsMap); err != nil {
+	guid, err := generateUUID()
+
+	if err != nil {
+
 		return err
 	}
 
-	id := fmt.Sprintf("%s@%s", name, vhost)
-	d.SetId(id)
+	d.SetId(fmt.Sprintf("%s@%s@%s", name, vhost, guid))
+
+	if err := declareExchange(rmqc, vhost, name, settingsMap); err != nil {
+
+		return err
+	}
 
 	return ReadExchange(d, meta)
 }

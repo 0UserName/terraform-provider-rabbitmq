@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 )
 
@@ -103,12 +104,19 @@ func CreateQueue(d *schema.ResourceData, meta interface{}) error {
 		settingsMap["arguments"] = arguments
 	}
 
-	if err := declareQueue(rmqc, vhost, name, settingsMap); err != nil {
+	guid, err := generateUUID()
+
+	if err != nil {
+
 		return err
 	}
 
-	id := fmt.Sprintf("%s@%s", name, vhost)
-	d.SetId(id)
+	d.SetId(fmt.Sprintf("%s@%s@%s", name, vhost, guid))
+
+	if err := declareQueue(rmqc, vhost, name, settingsMap); err != nil {
+
+		return err
+	}
 
 	return ReadQueue(d, meta)
 }

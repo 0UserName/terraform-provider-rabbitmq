@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"errors"
 	"fmt"
-
 	"strings"
 
 	"github.com/hashicorp/go-uuid"
@@ -58,4 +57,42 @@ func parseId(resourceId string) (name, vhost string, err error) {
 func generateUUID() (string, error) {
 
 	return uuid.GenerateUUID()
+}
+
+/*
+Get the resource name, guid
+and rabbitmq vhost from the
+resource id.
+
+The input argument is used as
+the return value if it is not
+a valid resource identifier.
+*/
+func parseStandardIdWithFallback(resourceId string) (name, vhost, guid string) {
+
+	name, vhost, guid, err := parseStandardId(resourceId)
+
+	if err != nil {
+
+		name = resourceId
+	}
+
+	return name, vhost, guid
+}
+
+/*
+Get the resource name, guid
+and rabbitmq vhost from the
+resource id.
+*/
+func parseStandardId(resourceId string) (name, vhost, guid string, err error) {
+
+	parts := strings.Split(resourceId, "@")
+
+	if len(parts) >= 3 {
+
+		return parts[0], parts[1], parts[2], err
+	}
+
+	return name, vhost, guid, fmt.Errorf("unable to parse resource id: %s", resourceId)
 }
