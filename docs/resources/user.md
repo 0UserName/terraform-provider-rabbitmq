@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_user"
 sidebar_current: "docs-rabbitmq-resource-user"
 description: |-
-  Creates and manages a user on a RabbitMQ server.
+Creates and manages a user on a RabbitMQ server.
 ---
 
 # rabbitmq\_user
@@ -17,6 +17,7 @@ The ``rabbitmq_user`` resource creates and manages a user.
 
 ```hcl
 resource "rabbitmq_user" "test" {
+  
   name     = "mctest"
   password = "foobar"
   tags     = ["administrator", "management"]
