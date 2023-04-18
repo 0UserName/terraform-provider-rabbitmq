@@ -138,7 +138,9 @@ func ReadLimit(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("limit %s was not found", limit)
+	log.Printf("[WARN] limit %s was not found", limit)
+	d.SetId("")
+	return nil
 }
 
 func DeleteLimit(d *schema.ResourceData, meta interface{}) error {
