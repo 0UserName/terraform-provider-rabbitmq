@@ -35,21 +35,28 @@ func dataSourceQueueRead(d *schema.ResourceData, meta interface{}) error {
 
 	rmqc := meta.(*rabbithole.Client)
 
-	queue, err := rmqc.GetQueue(d.Get("vhost").(string), d.Get("name").(string))
-
-	if err != nil {
-
-		return checkDeleted(d, fmt.Errorf("cannot locate queue: %s", err))
-	}
-
-	guid, err := generateUUID()
+	vhost, _, _, err := parseIdWithArgs(d.Get("vhost").(string))
 
 	if err != nil {
 
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s@%s@%s", queue.Name, queue.Vhost, guid))
+	name, _, _, err := parseIdWithArgs(d.Get("name").(string))
+
+	if err != nil {
+
+		return err
+	}
+
+	queue, err := rmqc.GetQueue(vhost, name)
+
+	if err != nil {
+
+		return checkDeleted(d, fmt.Errorf("cannot locate queue: %s", err))
+	}
+
+	d.SetId(fmt.Sprintf("%s@%s@%s", queue.Name, queue.Vhost, fmt.Sprintf("%t:%t:%s", queue.Durable, queue.AutoDelete, toString(queue.Arguments))))
 
 	return nil
 }

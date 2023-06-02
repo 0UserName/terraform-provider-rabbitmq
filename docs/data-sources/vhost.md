@@ -25,7 +25,7 @@ data "rabbitmq_vhost" "test" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the queue.
+* `name` - (Required) The name of the vhost.
 
 ## Attributes Reference
 

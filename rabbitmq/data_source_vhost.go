@@ -29,7 +29,14 @@ func dataSourceVhostRead(d *schema.ResourceData, meta interface{}) error {
 
 	rmqc := meta.(*rabbithole.Client)
 
-	vhost, err := rmqc.GetVhost(d.Get("name").(string))
+	name, _, _, err := parseIdWithArgs(d.Get("name").(string))
+
+	if err != nil {
+
+		return err
+	}
+
+	vhost, err := rmqc.GetVhost(name)
 
 	if err != nil {
 

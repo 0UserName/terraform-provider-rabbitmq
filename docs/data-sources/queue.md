@@ -22,7 +22,7 @@ data "rabbitmq_vhost" "test" {
 
 data "rabbitmq_queue" "test" {
 
-  vhost = "rabbitmq_vhost.test.name"
+  vhost = rabbitmq_vhost.test.name
   name  = "test"
 }
 ```
