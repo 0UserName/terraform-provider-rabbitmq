@@ -96,21 +96,19 @@ func testAccBindingCheck(rn string, bindingInfo *rabbithole.BindingInfo) resourc
 		}
 
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
-		bindingParts := strings.Split(rs.Primary.ID, "/")
+		bindingParts := strings.Split(rs.Primary.ID, "#")
 
 		bindings, err := rmqc.ListBindingsIn(percentDecodeSlashes(bindingParts[0]))
 		if err != nil {
 			return fmt.Errorf("Error retrieving exchange: %s", err)
 		}
 
-		for _, binding := range bindings {
-			if binding.Source == bindingParts[1] && binding.Destination == bindingParts[2] && binding.DestinationType == bindingParts[3] && binding.PropertiesKey == bindingParts[4] {
-				*bindingInfo = binding
-				return nil
-			}
+		if binding, err := getBindingById(bindingParts, bindings); err == nil {
+			*bindingInfo = binding
+			return nil
 		}
 
-		return fmt.Errorf("Unable to find binding %s", rn)
+		return err
 	}
 }
 

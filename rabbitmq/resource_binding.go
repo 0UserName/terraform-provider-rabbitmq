@@ -77,6 +77,28 @@ func resourceBinding() *schema.Resource {
 	}
 }
 
+func getBindingById(parts []string, bindings []rabbithole.BindingInfo) (rabbithole.BindingInfo, error) {
+
+	v := parts[0]
+	t := parts[1]
+	k := parts[2]
+
+	s := parseName(parts[3])
+	d := parseName(parts[4])
+
+	log.Printf("[DEBUG] RabbitMQ: Attempting to find binding for: vhost=%s source=%s destination=%s destinationType=%s propertiesKey=%s", v, s, d, t, k)
+
+	for _, binding := range bindings {
+
+		if binding.DestinationType == t && binding.PropertiesKey == k && binding.Source == s && binding.Destination == d {
+
+			return binding, nil
+		}
+	}
+
+	return rabbithole.BindingInfo{}, fmt.Errorf("binding cannot be found")
+}
+
 func CreateBinding(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
@@ -95,8 +117,8 @@ func CreateBinding(d *schema.ResourceData, meta interface{}) error {
 		arguments = arguments_json
 	}
 
-	srcName, _, guidSrc := parseStandardIdWithFallback(d.Get("source").(string))
-	dstName, _, guidDst := parseStandardIdWithFallback(d.Get("destination").(string))
+	srcName, _, _, _ := parseIdWithArgs(d.Get("source").(string))
+	dstName, _, _, _ := parseIdWithArgs(d.Get("destination").(string))
 
 	bindingInfo := rabbithole.BindingInfo{
 
@@ -120,17 +142,8 @@ func CreateBinding(d *schema.ResourceData, meta interface{}) error {
 
 	bindingInfo.PropertiesKey = propertiesKey
 
-	/*
-		Use the guid parsed from the identifiers of the parent resources:
-		queue or exchange. Since the guid changes every time the resource
-		is recreated, it will help to track changes at the level of child
-		resources and recreate them.
-
-		https://github.com/cyrilgdn/terraform-provider-rabbitmq/issues/34
-		https://github.com/cyrilgdn/terraform-provider-rabbitmq/issues/25
-	*/
-
-	d.SetId(strings.TrimRight(fmt.Sprintf("%s/%s/%s/%s/%s/%s/%s", percentEncodeSlashes(vhost), bindingInfo.Source, bindingInfo.Destination, bindingInfo.DestinationType, bindingInfo.PropertiesKey, guidSrc, guidDst), "/"))
+	// Use the composite id structure to solve the following bug: https://github.com/cyrilgdn/terraform-provider-rabbitmq/issues/25
+	d.SetId(fmt.Sprintf("%s#%s#%s#%s#%s", percentEncodeSlashes(vhost), bindingInfo.DestinationType, bindingInfo.PropertiesKey, d.Get("source"), d.Get("destination")))
 
 	return ReadBinding(d, meta)
 }
@@ -139,19 +152,13 @@ func ReadBinding(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	log.Printf("[TRACE] RabbitMQ: read binding resource ID (pre-split): %s", d.Id())
-	bindingId := strings.Split(d.Id(), "/")
+	bindingId := strings.Split(d.Id(), "#")
 	log.Printf("[DEBUG] RabbitMQ: binding ID: %#v", bindingId)
 	if len(bindingId) < 5 {
 		return fmt.Errorf("Unable to determine binding ID")
 	}
 
 	vhost := percentDecodeSlashes(bindingId[0])
-	source := bindingId[1]
-	destination := bindingId[2]
-	destinationType := bindingId[3]
-	propertiesKey := bindingId[4]
-	log.Printf("[DEBUG] RabbitMQ: Attempting to find binding for: vhost=%s source=%s destination=%s destinationType=%s propertiesKey=%s",
-		vhost, source, destination, destinationType, propertiesKey)
 
 	bindings, err := rmqc.ListBindingsIn(vhost)
 	if err != nil {
@@ -159,35 +166,33 @@ func ReadBinding(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] RabbitMQ: Bindings retrieved: %#v", bindings)
-	bindingFound := false
-	for _, binding := range bindings {
-		log.Printf("[TRACE] RabbitMQ: Assessing binding: %#v", binding)
-		if binding.Source == source && binding.Destination == destination && binding.DestinationType == destinationType && binding.PropertiesKey == propertiesKey {
-			log.Printf("[DEBUG] RabbitMQ: Found Binding: %#v", binding)
-			bindingFound = true
 
-			d.Set("vhost", binding.Vhost)
-			d.Set("source", binding.Source)
-			d.Set("destination", binding.Destination)
-			d.Set("destination_type", binding.DestinationType)
-			d.Set("routing_key", binding.RoutingKey)
-			d.Set("properties_key", binding.PropertiesKey)
+	binding, err := getBindingById(bindingId, bindings)
 
-			if v, ok := d.Get("arguments_json").(string); ok && v != "" {
-				bytes, err := json.Marshal(binding.Arguments)
-				if err != nil {
-					return fmt.Errorf("could not encode arguments as JSON: %w", err)
-				}
-				d.Set("arguments_json", string(bytes))
-			} else {
-				d.Set("arguments", binding.Arguments)
+	if err == nil {
+
+		log.Printf("[DEBUG] RabbitMQ: Found Binding: %#v", binding)
+
+		d.Set("vhost", binding.Vhost)
+		d.Set("source", bindingId[3])
+		d.Set("destination", bindingId[4])
+		d.Set("destination_type", binding.DestinationType)
+		d.Set("routing_key", binding.RoutingKey)
+		d.Set("properties_key", binding.PropertiesKey)
+
+		if v, ok := d.Get("arguments_json").(string); ok && v != "" {
+			bytes, err := json.Marshal(binding.Arguments)
+			if err != nil {
+				return fmt.Errorf("could not encode arguments as JSON: %w", err)
 			}
+			d.Set("arguments_json", string(bytes))
+		} else {
+			d.Set("arguments", binding.Arguments)
 		}
-	}
+	} else {
 
-	// The binding could not be found,
-	// so consider it deleted and remove from state
-	if !bindingFound {
+		// The binding could not be found,
+		// so consider it deleted and remove from state
 		d.SetId("")
 	}
 
@@ -197,16 +202,16 @@ func ReadBinding(d *schema.ResourceData, meta interface{}) error {
 func DeleteBinding(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	bindingId := strings.Split(d.Id(), "/")
+	bindingId := strings.Split(d.Id(), "#")
 	if len(bindingId) < 5 {
 		return fmt.Errorf("Unable to determine binding ID")
 	}
 
 	vhost := percentDecodeSlashes(bindingId[0])
-	source := bindingId[1]
-	destination := bindingId[2]
-	destinationType := bindingId[3]
-	propertiesKey := bindingId[4]
+	destinationType := bindingId[1]
+	source, _, _, _ := parseIdWithArgs(bindingId[3])
+	destination, _, _, _ := parseIdWithArgs(bindingId[4])
+	propertiesKey := bindingId[2]
 
 	bindingInfo := rabbithole.BindingInfo{
 		Vhost:           vhost,
@@ -217,7 +222,7 @@ func DeleteBinding(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete binding for: vhost=%s source=%s destination=%s destinationType=%s propertiesKey=%s",
-		vhost, source, destination, destinationType, propertiesKey)
+		bindingInfo.Vhost, bindingInfo.Source, bindingInfo.Destination, bindingInfo.DestinationType, bindingInfo.PropertiesKey)
 
 	resp, err := rmqc.DeleteBinding(vhost, bindingInfo)
 	if err != nil {

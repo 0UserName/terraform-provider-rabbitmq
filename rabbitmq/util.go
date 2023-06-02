@@ -1,11 +1,12 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
@@ -37,62 +38,40 @@ func percentDecodeSlashes(s string) string {
 	return strings.Replace(strings.Replace(s, "%2F", "/", -1), "%25", "%", -1)
 }
 
-// get the id of the resource from the ResourceData
-func parseResourceId(d *schema.ResourceData) (name, vhost string, err error) {
-	return parseId(d.Id())
-}
-
-// get the resource name and rabbitmq vhost from the resource id
-func parseId(resourceId string) (name, vhost string, err error) {
-	parts := strings.Split(resourceId, "@")
-	if len(parts) != 2 {
-		err = fmt.Errorf("Unable to parse resource id: %s", resourceId)
-		return
-	}
-	name = parts[0]
-	vhost = parts[1]
-	return
-}
-
-func generateUUID() (string, error) {
-
-	return uuid.GenerateUUID()
-}
-
-/*
-Get the resource name, guid
-and rabbitmq vhost from the
-resource id.
-
-The input argument is used as
-the return value if it is not
-a valid resource identifier.
-*/
-func parseStandardIdWithFallback(resourceId string) (name, vhost, guid string) {
-
-	name, vhost, guid, err := parseStandardId(resourceId)
-
-	if err != nil {
-
-		name = resourceId
-	}
-
-	return name, vhost, guid
-}
-
-/*
-Get the resource name, guid
-and rabbitmq vhost from the
-resource id.
-*/
-func parseStandardId(resourceId string) (name, vhost, guid string, err error) {
+// Parses name, vhost from standard resource id. args
+// is an array containing the rest of the id segments.
+// NOTE: don't use for binding resource.
+func parseIdWithArgs(resourceId string) (name string, vhost string, args []string, err error) {
 
 	parts := strings.Split(resourceId, "@")
 
-	if len(parts) >= 3 {
+	switch len(parts) {
 
-		return parts[0], parts[1], parts[2], err
+	case 0:
+		return "", "", nil, fmt.Errorf("unable to parse resource id: %s", resourceId)
+	case 1:
+		return parts[0], "", []string{}, nil
+	case 2:
+		return parts[0], parts[1], []string{}, nil
+	default:
+		return parts[0], parts[1], parts[2:], nil
 	}
+}
 
-	return name, vhost, guid, fmt.Errorf("unable to parse resource id: %s", resourceId)
+// Parses the resource name from the standard resource id.
+func parseName(id string) string {
+
+	name := strings.Split(id, "@")[0]
+
+	log.Printf("[DEBUG] RabbitMQ: read resource name %s from id: %s", name, id)
+
+	return name
+}
+
+// Convert dictionary to JSON string.
+func toString(arguments map[string]interface{}) (result string) {
+
+	raw, _ := json.Marshal(arguments)
+
+	return string(raw)
 }

@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -80,16 +79,11 @@ func CreateExchange(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to parse settings")
 	}
 
-	guid, err := generateUUID()
+	d.SetId(fmt.Sprintf("%s@%s@%s", name, vhost, toString(settingsMap)))
+
+	err := declareExchange(rmqc, vhost, name, settingsMap)
 
 	if err != nil {
-
-		return err
-	}
-
-	d.SetId(fmt.Sprintf("%s@%s@%s", name, vhost, guid))
-
-	if err := declareExchange(rmqc, vhost, name, settingsMap); err != nil {
 
 		return err
 	}
@@ -100,13 +94,12 @@ func CreateExchange(d *schema.ResourceData, meta interface{}) error {
 func ReadExchange(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	exchangeId := strings.Split(d.Id(), "@")
-	if len(exchangeId) < 2 {
-		return fmt.Errorf("Unable to determine exchange ID")
-	}
+	name, vhost, _, err := parseIdWithArgs(d.Id())
 
-	name := exchangeId[0]
-	vhost := exchangeId[1]
+	if err != nil {
+
+		return err
+	}
 
 	exchangeSettings, err := rmqc.GetExchange(vhost, name)
 	if err != nil {
@@ -133,13 +126,12 @@ func ReadExchange(d *schema.ResourceData, meta interface{}) error {
 func DeleteExchange(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	exchangeId := strings.Split(d.Id(), "@")
-	if len(exchangeId) < 2 {
-		return fmt.Errorf("Unable to determine exchange ID")
-	}
+	name, vhost, _, err := parseIdWithArgs(d.Id())
 
-	name := exchangeId[0]
-	vhost := exchangeId[1]
+	if err != nil {
+
+		return err
+	}
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete exchange %s", d.Id())
 
