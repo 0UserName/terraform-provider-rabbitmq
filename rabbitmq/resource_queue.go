@@ -104,14 +104,7 @@ func CreateQueue(d *schema.ResourceData, meta interface{}) error {
 		settingsMap["arguments"] = arguments
 	}
 
-	guid, err := generateUUID()
-
-	if err != nil {
-
-		return err
-	}
-
-	d.SetId(fmt.Sprintf("%s@%s@%s", name, vhost, guid))
+	d.SetId(fmt.Sprintf("%s@%s@%s", name, vhost, toString(settingsMap)))
 
 	if err := declareQueue(rmqc, vhost, name, settingsMap); err != nil {
 

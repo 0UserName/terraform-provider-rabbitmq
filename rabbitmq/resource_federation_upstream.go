@@ -137,7 +137,7 @@ func CreateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, _, err := parseIdWithArgs(d.Id())
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 func UpdateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, _, err := parseIdWithArgs(d.Id())
 	if err != nil {
 		return err
 	}
@@ -204,7 +204,7 @@ func UpdateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 func DeleteFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, _, err := parseIdWithArgs(d.Id())
 	if err != nil {
 		return err
 	}
