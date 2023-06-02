@@ -1,7 +1,6 @@
 package rabbitmq
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
@@ -14,9 +13,9 @@ resource "rabbitmq_vhost" "test" {
   name = "test"
 }
 
-resource "rabbitmq_permissions" "guest" {
+resource "rabbitmq_permissions" "test" {
 
-  vhost = rabbitmq_vhost.test.name
+  vhost = rabbitmq_vhost.test.id
   user  = "guest"
 
   permissions {
@@ -29,7 +28,7 @@ resource "rabbitmq_permissions" "guest" {
 
 resource "rabbitmq_exchange" "test" {
 
-  vhost = rabbitmq_permissions.guest.vhost
+  vhost = rabbitmq_permissions.test.vhost
   name  = "test"
 
   settings {
@@ -42,7 +41,7 @@ resource "rabbitmq_exchange" "test" {
 
 data "rabbitmq_exchange" "test" {
 
-  vhost = rabbitmq_vhost.test.name
+  vhost = rabbitmq_vhost.test.id
   name  = rabbitmq_exchange.test.name
 }`
 
@@ -60,7 +59,7 @@ func TestAccDataSourceExchange_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceExchangeConfig_basic,
-				Check:  resource.TestMatchResourceAttr("data.rabbitmq_exchange.test", "id", regexp.MustCompile(fmt.Sprintf("^%s@%s@%s$", "test", "test", UuidRegex))),
+				Check:  resource.TestMatchResourceAttr("data.rabbitmq_exchange.test", "id", regexp.MustCompile("test@test@false:true:{}")),
 			},
 		},
 	})

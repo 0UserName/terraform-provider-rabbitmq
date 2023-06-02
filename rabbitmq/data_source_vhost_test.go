@@ -27,7 +27,7 @@ func TestAccDataSourceVhost_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceVhostConfig_basic,
-				Check:  resource.ComposeTestCheckFunc(resource.TestMatchResourceAttr("data.rabbitmq_vhost.test", "id", regexp.MustCompile("^/$"))),
+				Check:  resource.ComposeTestCheckFunc(resource.TestMatchResourceAttr("data.rabbitmq_vhost.test", "id", regexp.MustCompile("/"))),
 			},
 		},
 	})

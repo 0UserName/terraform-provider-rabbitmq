@@ -2,8 +2,6 @@ package rabbitmq
 
 import "testing"
 
-const UuidRegex = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-
 func TestParseId(t *testing.T) {
 	var badInputs = []string{
 		"",
