@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_vhost"
 sidebar_current: "docs-rabbitmq-resource-vhost"
 description: |-
-Creates and manages a vhost on a RabbitMQ server.
+  Creates and manages a vhost on a RabbitMQ server.
 ---
 
 # rabbitmq\_vhost

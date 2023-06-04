@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_user"
 sidebar_current: "docs-rabbitmq-resource-user"
 description: |-
-Creates and manages a user on a RabbitMQ server.
+  Creates and manages a user on a RabbitMQ server.
 ---
 
 # rabbitmq\_user

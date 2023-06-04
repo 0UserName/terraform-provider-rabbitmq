@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_vhost"
 sidebar_current: "docs-rabbitmq-data-source-vhost"
 description: |-
-Provides a vhost data source on a RabbitMQ server.
+  Provides a vhost data source on a RabbitMQ server.
 ---
 
 # rabbitmq\_vhost

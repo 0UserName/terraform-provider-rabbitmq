@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_queue"
 sidebar_current: "docs-rabbitmq-data-source-queue"
 description: |-
-Provides a queue data source on a RabbitMQ server.
+  Provides a queue data source on a RabbitMQ server.
 ---
 
 # rabbitmq\_queue

@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_limit"
 sidebar_current: "docs-rabbitmq-resource-limit"
 description: |-
-Creates and manages user or vhost limit on a RabbitMQ server.
+  Creates and manages user or vhost limit on a RabbitMQ server.
 ---
 
 # rabbitmq\_limit

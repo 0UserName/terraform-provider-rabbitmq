@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_user"
 sidebar_current: "docs-rabbitmq-data-source-user"
 description: |-
-Provides a user data source on a RabbitMQ server.
+  Provides a user data source on a RabbitMQ server.
 ---
 
 # rabbitmq\_user

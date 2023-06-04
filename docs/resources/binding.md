@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_binding"
 sidebar_current: "docs-rabbitmq-resource-binding"
 description: |-
-Creates and manages a binding on a RabbitMQ server.
+  Creates and manages a binding on a RabbitMQ server.
 ---
 
 # rabbitmq\_binding

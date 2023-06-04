@@ -3,7 +3,7 @@ layout: "rabbitmq"
 page_title: "RabbitMQ: rabbitmq_exchange"
 sidebar_current: "docs-rabbitmq-data-source-exchange"
 description: |-
-Provides an exchange data source on a RabbitMQ server.
+  Provides an exchange data source on a RabbitMQ server.
 ---
 
 # rabbitmq\_exchange
