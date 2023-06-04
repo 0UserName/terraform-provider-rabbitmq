@@ -22,7 +22,7 @@ Learn more:
 
   Required if building the provider.
 
-* [RabbitMQ][rabbitmq-releases] 3.8.x or later.
+* [RabbitMQ][rabbitmq-releases] 3.9.x or later.
 
   The provider supports versions in accordance with the RabbitMQ support policies.
 
