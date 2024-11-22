@@ -19,9 +19,9 @@ resource "rabbitmq_queue" "r_test" {
 }
 
 
-# For data_source units
-#data "rabbitmq_queue" "d_test" {
+ For data_source units
+data "rabbitmq_queue" "d_test" {
 
-#  vhost = rabbitmq_queue.r_test.vhost
-#  name  = rabbitmq_queue.r_test.name
-#}
+  vhost = rabbitmq_queue.r_test.vhost
+  name  = rabbitmq_queue.r_test.name
+}

@@ -9,6 +9,7 @@ import (
 func TestAccUserResource(t *testing.T) {
 
 	rn := "rabbitmq_user.r_test"
+	dn := "rabbitmq_user.d_test"
 
 	resource.Test(t, resource.TestCase{
 
@@ -24,7 +25,11 @@ func TestAccUserResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 
 					resource.TestCheckResourceAttr(rn, "id", "r_test"),
+					resource.TestCheckResourceAttr(dn, "id", "r_test"),
+
 					resource.TestCheckResourceAttr(rn, "name", "r_test"),
+					resource.TestCheckResourceAttr(dn, "name", "r_test"),
+
 					resource.TestCheckResourceAttr(rn, "tags", "r_test"),
 				),
 			},

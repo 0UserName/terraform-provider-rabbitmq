@@ -9,6 +9,7 @@ import (
 func TestAccQueueResource(t *testing.T) {
 
 	rn := "rabbitmq_queue.r_test"
+	dn := "rabbitmq_queue.d_test"
 
 	resource.Test(t, resource.TestCase{
 
@@ -23,9 +24,14 @@ func TestAccQueueResource(t *testing.T) {
 
 				Check: resource.ComposeAggregateTestCheckFunc(
 
-					//	resource.TestCheckResourceAttr(rn, "id", "r_test"),
+					//	resource.TestCheckResourceAttr(rn, "id", "r_test"), TODO: ADD TEST TO QUEUE_ID
+
 					resource.TestCheckResourceAttr(rn, "vhost", "/"),
+					resource.TestCheckResourceAttr(dn, "vhost", "/"),
+
 					resource.TestCheckResourceAttr(rn, "name", "r_test"),
+					resource.TestCheckResourceAttr(rn, "name", "d_test"),
+
 					resource.TestCheckResourceAttr(rn, "settings.type", "quorum"),
 					resource.TestCheckResourceAttr(rn, "settings.durable", "true"),
 					resource.TestCheckResourceAttr(rn, "settings.auto_delete", "false"),

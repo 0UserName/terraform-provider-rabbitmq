@@ -9,6 +9,7 @@ import (
 func TestAccExchangeResource(t *testing.T) {
 
 	rn := "rabbitmq_exchange.r_test"
+	dn := "rabbitmq_exchange.d_test"
 
 	resource.Test(t, resource.TestCase{
 
@@ -23,12 +24,18 @@ func TestAccExchangeResource(t *testing.T) {
 
 				Check: resource.ComposeAggregateTestCheckFunc(
 
-					//	resource.TestCheckResourceAttr(rn, "id", "r_test"),
+					//	resource.TestCheckResourceAttr(rn, "id", "r_test"), TODO: ADD TEST TO EXCHANGE_ID
+
 					resource.TestCheckResourceAttr(rn, "vhost", "/"),
+					resource.TestCheckResourceAttr(dn, "vhost", "/"),
+
 					resource.TestCheckResourceAttr(rn, "name", "r_test"),
+					resource.TestCheckResourceAttr(dn, "name", "d_test"),
+
 					resource.TestCheckResourceAttr(rn, "settings.type", "fanout"),
 					resource.TestCheckResourceAttr(rn, "settings.durable", "true"),
 					resource.TestCheckResourceAttr(rn, "settings.auto_delete", "false"),
+					
 					//resource.TestCheckResourceAttr(rn, "settings.arguments.x-message-ttl", "5000"),
 				),
 			},

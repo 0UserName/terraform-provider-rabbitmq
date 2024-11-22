@@ -9,6 +9,7 @@ import (
 func TestAccVhostResource(t *testing.T) {
 
 	rn := "rabbitmq_vhost.r_test"
+	dn := "rabbitmq_vhost.d_test"
 
 	resource.Test(t, resource.TestCase{
 
@@ -24,7 +25,10 @@ func TestAccVhostResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 
 					resource.TestCheckResourceAttr(rn, "id", "r_test"),
+					resource.TestCheckResourceAttr(dn, "id", "d_test"),
+
 					resource.TestCheckResourceAttr(rn, "name", "r_test"),
+					resource.TestCheckResourceAttr(dn, "name", "d_test"),
 				),
 			},
 

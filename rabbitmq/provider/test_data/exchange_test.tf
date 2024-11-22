@@ -15,8 +15,8 @@ resource "rabbitmq_exchange" "r_test" {
 
 
 # For data_source units
-#data "rabbitmq_exchange" "d_test" {
+data "rabbitmq_exchange" "d_test" {
 
-#  vhost = rabbitmq_exchange.r_test.vhost
-#  name  = rabbitmq_exchange.r_test.name
-#}
+  vhost = rabbitmq_exchange.r_test.vhost
+  name  = rabbitmq_exchange.r_test.name
+}
