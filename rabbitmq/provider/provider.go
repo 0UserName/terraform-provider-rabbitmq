@@ -233,8 +233,10 @@ func (p *RabbitMqProvider) DataSources(ctx context.Context) []func() datasource.
 
 	return []func() datasource.DataSource{
 
-		//NewVhostDataSource,
-		//NewUserDataSource,
+		NewVhostDataSource,
+		NewUserDataSource,
+		NewExchangeDataSource,
+		NewQueueDataSource,
 	}
 }
 
